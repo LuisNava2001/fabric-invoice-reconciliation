@@ -1,0 +1,18 @@
+{
+  "rules_version": "2026.1",
+  "currencies": {
+    "USD": {"minor_units": 2, "tolerance": "0.01"},
+    "EUR": {"minor_units": 2, "tolerance": "0.01"},
+    "MXN": {"minor_units": 2, "tolerance": "0.01"},
+    "CAD": {"minor_units": 2, "tolerance": "0.01"},
+    "JPY": {"minor_units": 0, "tolerance": "1"}
+  },
+  "amount_max": "10000000",
+  "payment_statuses": ["OPEN", "PAID", "PARTIALLY_PAID"],
+  "fuzzy": {
+    "name_similarity_threshold": "0.80",
+    "reference_similarity_threshold": "0.75",
+    "max_suggestions_per_record": 3
+  },
+  "legal_suffixes": ["LTD", "LLC", "INC", "CO", "CORP", "GMBH", "SA", "SAS", "BV", "PLC"]
+}

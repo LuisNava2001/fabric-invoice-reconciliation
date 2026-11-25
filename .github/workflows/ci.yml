@@ -1,0 +1,105 @@
+name: CI
+
+# Three layers, so the expensive Spark work runs once per push instead of once per matrix cell:
+#   fast         no JVM: generator, rules, contracts, CLI pre-flight, notebook format, demo files
+#   spark-full   the whole test suite on the primary combination (Python 3.11, Java 17)
+#   spark-smoke  real Spark + Delta on the combination closest to Fabric Runtime 2.0 (Python 3.13, Java 21)
+# The default 2 x 5,000-invoice run and the committed demo/data.js check live in full-volume.yml (manual).
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: fast tests (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install -e ".[dev]"
+      - name: Tests that need no JVM
+        run: python -m pytest -m "not spark" -v
+
+  spark-full:
+    # Every test, including Delta writes, replaceWhere, MERGE, idempotent re-runs, invariants on generated
+    # data, the notebook cells, the CLI in a separate process and demo generation (2 batches x 100 invoices).
+    name: spark + delta full suite (Python 3.11, Java 17)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.ivy2.5.2
+          key: ivy-delta-spark-4.2.0-${{ runner.os }}
+      - run: python -m pip install -e ".[dev]"
+      - name: Java, PySpark and delta-spark versions
+        run: |
+          java -version
+          python -c "import importlib.metadata as m; print('pyspark', m.version('pyspark'), '| delta-spark', m.version('delta-spark'))"
+      - name: Full test suite
+        run: python -m pytest -v --durations=15
+
+  spark-smoke:
+    # Real Spark + Delta, reduced volume: Delta I/O and MERGE (test_delta), the end-to-end pipeline with
+    # synthetic ground truth, idempotent re-run and batch rejection (test_pipeline), matching invariants
+    # (test_reconcile), then the CLI from scratch and a demo build + drift check on one small batch.
+    name: spark + delta smoke (Python 3.13, Java 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.ivy2.5.2
+          key: ivy-delta-spark-4.2.0-${{ runner.os }}
+      - run: python -m pip install -e ".[dev]"
+      - name: Java, PySpark and delta-spark versions
+        run: |
+          java -version
+          python -c "import importlib.metadata as m; print('pyspark', m.version('pyspark'), '| delta-spark', m.version('delta-spark'))"
+      - name: Delta, pipeline and matching tests
+        run: python -m pytest tests/test_delta.py tests/test_pipeline.py tests/test_reconcile.py -v --durations=10
+      - name: CLI from scratch on one small batch, demo build and drift check
+        shell: bash
+        run: |
+          python -m invoice_recon generate-data --invoices 100 --batches 1
+          python -m invoice_recon run
+          python -m invoice_recon demo --out "$RUNNER_TEMP/data.js"
+          python -m invoice_recon demo --out "$RUNNER_TEMP/data.js" --check

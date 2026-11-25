@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice Reconciliation Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="page-header">
+    <div class="wrap">
+      <p class="eyebrow">fabric-invoice-reconciliation · offline demo</p>
+      <h1>Invoice reconciliation, Bronze → Silver → Gold</h1>
+      <p class="lede" id="source-note"></p>
+      <div class="badges" id="badges"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="tabs" id="batch-tabs" aria-label="Batches"></nav>
+
+    <section aria-labelledby="kpi-title">
+      <h2 id="kpi-title" class="visually-hidden">Key figures</h2>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <section aria-labelledby="layers-title">
+      <h2 id="layers-title">Layers and record conservation</h2>
+      <p class="hint">Every landing record appears exactly once in each layer. Counts below come from the stored Delta tables.</p>
+      <div class="layers" id="layers"></div>
+    </section>
+
+    <section aria-labelledby="status-title">
+      <h2 id="status-title">Reconciliation status by side</h2>
+      <p class="hint">One status per source record. Only MATCHED closes a record; everything else, and matched records with review flags, goes to the exceptions table.</p>
+      <div class="table-wrap"><table class="status-table" id="status-table"></table></div>
+    </section>
+
+    <section aria-labelledby="evidence-title">
+      <h2 id="evidence-title">Match evidence examples</h2>
+      <p class="hint">Rule R1: same supplier ID, same normalized reference, same currency, amount difference within the currency tolerance.</p>
+      <div class="cards" id="evidence"></div>
+    </section>
+
+    <section aria-labelledby="dq-title">
+      <h2 id="dq-title">Data-quality rules that fired</h2>
+      <div class="table-wrap"><table id="dq-table"></table></div>
+      <p class="hint" id="dq-note"></p>
+    </section>
+
+    <section aria-labelledby="suggest-title">
+      <h2 id="suggest-title">Candidate suggestions (secondary, never auto-approved)</h2>
+      <p class="hint">Similarity is only used on records left unmatched by the deterministic rule. A person decides.</p>
+      <div class="table-wrap"><table id="suggestions"></table></div>
+    </section>
+
+    <section aria-labelledby="exceptions-title">
+      <h2 id="exceptions-title">Exceptions for review</h2>
+      <div class="pills" id="exception-pills"></div>
+      <div class="table-wrap"><table id="exceptions"></table></div>
+    </section>
+
+    <section aria-labelledby="checks-title">
+      <h2 id="checks-title">Validation checks for this batch</h2>
+      <ul class="checks" id="checks"></ul>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>All companies, identifiers and amounts are synthetic. The figures were produced by a local Spark + Delta Lake run;
+      execution inside Microsoft Fabric has not been tested.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

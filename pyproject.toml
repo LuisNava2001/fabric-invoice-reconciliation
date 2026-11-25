@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabric-invoice-reconciliation"
+version = "0.1.0"
+description = "Invoice reconciliation on PySpark + Delta Lake with a Bronze/Silver/Gold layout aimed at Microsoft Fabric (synthetic data)."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Luis Nava" }]
+# Pinned to the pair verified locally: Delta Lake 4.2 supports Spark 4.0.x and 4.1.x, and
+# delta-spark 4.2.0 itself requires pyspark <= 4.1.1 (see docs/fabric.md).
+dependencies = [
+    "pyspark==4.1.1",
+    "delta-spark==4.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "nbformat>=5.9",
+]
+
+[project.scripts]
+invoice-recon = "invoice_recon.cli:main"
+
+[tool.setuptools]
+packages = ["invoice_recon", "invoice_recon.data"]
+
+[tool.setuptools.package-data]
+"invoice_recon.data" = ["*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "spark: needs a local Spark session (Java 17+; on Windows also winutils.exe and hadoop.dll)",
+    "slow: runs the CLI in a separate process end to end",
+]
+addopts = "-ra"
