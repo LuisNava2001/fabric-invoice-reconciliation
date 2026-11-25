@@ -23,7 +23,7 @@ the Windows helpers are missing; a skip is reported, it is not a pass.
 | `test_reconcile.py` | 21 | Rule R1 and its evidence, reference variants, inclusive per-currency tolerance, no cross-currency comparison, one-sided records and their reasons, **two NULLs never match**, ambiguous keys listed but not decided, possible double posting, **duplicates do not multiply matches**, conflicting duplicates block a match, review flags, key classification partitions every key once, result independent of input order, invariants on two random data sets with many collisions |
 | `test_fuzzy.py` | 8 | Same reference under a similarly named supplier, dissimilar names ignored, same supplier and amount with a similar reference, different amount ignored, matched records never suggested, cap and ranking, Spark similarity equals the Python reference, designed suggestions present in the run |
 | `test_delta.py` | 8 | Delta round trip with declared schema and partitioning, idempotent and isolated batch rewrites, schema mismatch refused with no new version, Delta's own schema enforcement, rows from another batch refused, `replaceWhere` violation leaves no commit, missing tables and empty batches, MERGE upsert of the control table |
-| `test_pipeline.py` | 7 | All validation checks pass for both batches including the synthetic ground truth, stage counts line up, metrics derived from stored tables, **re-running a batch leaves every table byte-identical and the other batch untouched**, corrected landing file replaces the Bronze slice, schema mismatch rejects the batch and keeps previous data, missing upstream data |
+| `test_pipeline.py` | 7 | All validation checks pass for both batches including the synthetic ground truth, stage counts line up, metrics derived from stored tables, **re-running a batch leaves the row content of every batch table unchanged (row count and order-independent SHA-256 of the rows) and the other batch untouched; the Delta version advances and `ops_batch_runs` still holds 6 rows, all `SUCCEEDED`**, corrected landing file replaces the Bronze slice, schema mismatch rejects the batch and keeps previous data, missing upstream data |
 | `test_cli.py` | 5 | `validate`, `report`, `demo` and `demo --check` in-process (exit 0), drift detected (exit 4), tampered Gold table fails validation (exit 4), bad header (exit 3), unknown batch (exit 3) |
 | `test_cli_process.py` | 1 | `generate-data` and `run` in a new process with its own JVM, reports written, validation passed |
 | `test_notebook.py` | 2 | Notebook is valid nbformat, committed without outputs, says Fabric execution is not tested; every code cell except `%pip` runs locally against Spark |
@@ -35,7 +35,7 @@ the Windows helpers are missing; a skip is reported, it is not a pass.
 | --- | --- |
 | `python -m pytest -v` | 158 passed, 0 skipped, 0 failed (47 min) |
 | `python -m pytest -m "not spark"` in a fresh copy with a new virtual environment | 65 passed (8 s) |
-| `python -m invoice_recon run --generate --force` (2 batches x 5,000 base invoices) | exit 0 in 631 s; 25/25 checks per batch; ground truth 10,142/10,142 and 10,162/10,162 |
+| `python -m invoice_recon run --generate --force` (2 batches x 5,000 base invoices) | exit 0 in 631 s; 25/25 checks per batch; designed-outcome agreement 10,142/10,142 and 10,162/10,162 |
 | `python -m invoice_recon demo --check` in a new process | `demo/data.js is up to date` |
 
 Slowest steps: the shared two-batch pipeline run (~390 s, fixture setup), `demo` + `demo --check` through

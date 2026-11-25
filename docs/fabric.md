@@ -24,8 +24,8 @@ Sources, checked on 2026-11-24:
   Spark 4.0.x and 4.1.x).
 * Spark 4.1.0 overview: <https://spark.apache.org/docs/4.1.0/> ("Java 17/21, Scala 2.13, Python 3.10+").
 
-The project brief listed Delta Lake 4.1 for Runtime 2.0; the official page lists Delta Lake 4.2, so the
-local pin follows the page. `delta-spark` 4.2.0 itself requires `pyspark <= 4.1.1`, which fixes the
+The local pin follows the official runtime page (Delta Lake 4.2), not older summaries that list Delta
+Lake 4.1 for Runtime 2.0. `delta-spark` 4.2.0 itself requires `pyspark <= 4.1.1`, which fixes the
 PySpark version.
 
 ## Differences that have not been verified

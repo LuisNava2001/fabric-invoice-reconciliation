@@ -32,7 +32,9 @@ Delta adds its own checks, which the tests exercise: appending a frame with an e
 | Property | Status | Evidence |
 | --- | --- | --- |
 | Real Delta write, read, `_delta_log`, partitioning by `_batch_id` | Verified | `tests/test_delta.py` (`DESCRIBE DETAIL`) |
-| Re-running a batch produces identical table content | Verified | `test_rerunning_a_batch_changes_nothing_and_leaves_the_other_batch_alone` compares SHA-256 digests of every batch table before and after |
+| Re-running a batch produces identical row content in the 12 batch tables | Verified | `test_rerunning_a_batch_changes_nothing_and_leaves_the_other_batch_alone` compares, per table and batch, the row count and a SHA-256 over the sorted per-row JSON hashes (order-independent), before and after |
+| Re-running a batch rewrites the data | Verified | same test: the Delta version advances, so the re-run wrote new files (physical files are not byte-identical) |
+| `ops_batch_runs` after a re-run | Verified (state only) | same test: still one row per batch and stage (6 rows, upserted with MERGE), all `SUCCEEDED`; the timestamps change by design, so its content is not compared |
 | Rewriting one batch leaves other batches untouched | Verified | same test, plus `test_rewriting_a_batch_is_idempotent_and_isolated` |
 | A refused write (schema, predicate violation) creates no new table version | Verified | version history compared before and after |
 | Corrected landing file replaces the old Bronze slice | Verified | `test_corrected_landing_file_replaces_the_bronze_slice` |
@@ -51,7 +53,7 @@ spark.sql("DESCRIBE HISTORY delta.`lakehouse/Tables/gold_reconciliation`").show(
 
 ## Local performance note
 
-On the development machine (Windows 11, corporate endpoint protection) one Delta commit takes about
+On the development machine (Windows 11, endpoint security software active) one Delta commit takes about
 5 seconds even for tiny tables, while the Spark jobs inside it take about 1.5 seconds. A batch writes
 12 batch tables plus 3 MERGEs into the control table, so commit overhead dominates local run time. Two settings are applied to local
 sessions only: `spark.databricks.delta.snapshotPartitions=2` (measured ~8.5 s → ~5 s per commit) and

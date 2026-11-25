@@ -105,6 +105,7 @@ change a status. Matched records are never suggested, so similarity cannot overr
 
 ## Determinism
 
-Re-running a batch gives identical tables (verified by content digests in the tests). The engine has no
+Re-running a batch gives identical row content in every batch table (verified by order-independent row digests in
+the tests; the Delta files themselves are rewritten). The engine has no
 order-dependent choice: survivors of exact duplicates are the earliest line, suggestion ranks break ties
 on the ledger line, and reports sort everything they show.

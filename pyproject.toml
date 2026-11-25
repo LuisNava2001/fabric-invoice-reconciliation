@@ -7,7 +7,7 @@ name = "fabric-invoice-reconciliation"
 version = "0.1.0"
 description = "Invoice reconciliation on PySpark + Delta Lake with a Bronze/Silver/Gold layout aimed at Microsoft Fabric (synthetic data)."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [{ name = "Luis Nava" }]
 # Pinned to the pair verified locally: Delta Lake 4.2 supports Spark 4.0.x and 4.1.x, and
 # delta-spark 4.2.0 itself requires pyspark <= 4.1.1 (see docs/fabric.md).

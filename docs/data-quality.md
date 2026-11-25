@@ -101,4 +101,4 @@ error or warning. Reports and the demo list the rules that fired.
 | `MATCHED_SAME_CURRENCY`, `MATCHED_WITHIN_TOLERANCE`, `NO_CROSS_CURRENCY_COMPARISON` | rule R1 holds on stored data |
 | `ONLY_VALID_RECORDS_DECIDED`, `SUGGESTIONS_NEVER_APPROVED` | quarantined records never matched; suggestions stay suggestions |
 | `EXCEPTIONS_MATCH_REVIEW_FLAG`, `METRICS_CONSISTENT` | derived tables agree with the reconciliation table |
-| `SYNTHETIC_GROUND_TRUTH`, `SYNTHETIC_SUGGESTIONS` | synthetic data only: every record has its designed status, reason, flags and review |
+| `SYNTHETIC_GROUND_TRUTH`, `SYNTHETIC_SUGGESTIONS` | synthetic data only (designed-outcome agreement, not accuracy against real data): every record has its designed status and review decision, its designed reason when one was designed, and at least its designed flags; every designed suggestion is produced |

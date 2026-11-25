@@ -11,7 +11,7 @@ from them and every write is checked against them (names, order and types).
 | --- | --- |
 | `invoice_id` | Unique document ID issued with the e-invoice (for example `EI-202603-00042`). |
 | `supplier_id` | Supplier identifier, `SUP-####`. |
-| `supplier_name` | Free text. Added to the brief's column list; used only by similarity suggestions. |
+| `supplier_name` | Free text. Not needed for matching; used only by similarity suggestions. |
 | `invoice_date` | ISO date `YYYY-MM-DD`. |
 | `currency` | ISO 4217 code. |
 | `subtotal`, `tax_amount`, `total_amount` | Decimal text, up to 4 decimals. |

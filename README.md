@@ -108,9 +108,11 @@ back after each write. Verified versus not tested guarantees: [docs/delta-lake.m
 
 ## 10. Quick Start
 
-Requires Python 3.10+, a JDK 17 or 21 in `JAVA_HOME` and, on Windows, `winutils.exe` and `hadoop.dll`
-in `%HADOOP_HOME%\bin` ([docs/environment.md](docs/environment.md)). The first run downloads the Delta
-jars from Maven Central.
+Validated combinations: Python 3.11 + Java 17 (full suite, in CI on Ubuntu and locally on Windows 11),
+Python 3.13 + Java 21 (real Spark/Delta smoke in CI on Ubuntu), and the tests without a JVM on Ubuntu
+and Windows with Python 3.11 and 3.13. Other combinations have not been run. Spark needs a JDK in
+`JAVA_HOME` and, on Windows, `winutils.exe` and `hadoop.dll` in `%HADOOP_HOME%\bin`
+([docs/environment.md](docs/environment.md)). The first run downloads the Delta jars from Maven Central.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
@@ -128,7 +130,7 @@ Individual stages: `ingest`, `normalize`, `reconcile`, `validate`, `report` (all
 | 1 | unexpected internal error |
 | 2 | usage error |
 | 3 | input error: missing landing data, manifest or upstream table; source schema mismatch |
-| 4 | validation failed: conservation, invariants, ground truth or demo drift |
+| 4 | validation failed: conservation, invariants, designed-outcome agreement or demo drift |
 | 5 | environment error: Java or Hadoop helpers missing, Spark failed to start |
 
 ## 11. Demo Walkthrough
@@ -141,7 +143,7 @@ tables of the default run.
 
 Default run on the development machine (seed 4242, `run` from scratch in 631 s):
 
-| Batch | Invoice records | Ledger records | Matched pairs | Reconciliation rate | Records to review | Ground truth |
+| Batch | Invoice records | Ledger records | Matched pairs | Reconciliation rate | Records to review | Designed-outcome agreement |
 | --- | --- | --- | --- | --- | --- | --- |
 | batch-2026-03 | 5,101 | 5,041 | 4,224 | 82.81% | 2,158 | 10,142 / 10,142 |
 | batch-2026-04 | 5,095 | 5,067 | 4,186 | 82.16% | 2,176 | 10,162 / 10,162 |
@@ -149,8 +151,10 @@ Default run on the development machine (seed 4242, `run` from scratch in 631 s):
 The rate is matched invoices over invoice records. About 30% of the base invoices are deliberately
 assigned to one of the 30 problem scenarios, so the rate describes the synthetic scenario mix, not
 real-world performance.
-"Ground truth" counts records whose status, reason, flags and review decision equal the outcome the
-generator designed for them.
+"Designed-outcome agreement" counts records whose status and review decision equal the outcome the
+generator designed for them, whose reason matches when one was designed, and whose flags include every
+designed flag. It measures agreement with synthetic, designed outcomes, not accuracy against real data
+(the validation check is named `SYNTHETIC_GROUND_TRUTH`).
 
 ![Demo page](docs/images/demo.png)
 
@@ -164,8 +168,12 @@ python -m pytest -m "not spark" -v     # no JVM: generator, configuration, CLI p
 158 tests. Local result on 2026-11-24 (Windows 11, Python 3.11.9, Java 17): 158 passed, 0 skipped,
 0 failed, in 47 minutes; most of that time is Delta commit overhead on this machine. They include the
 invariants that matter most: two NULLs never match, duplicates never multiply matches, one record is
-never matched twice, re-running a batch leaves every table byte-identical, and every synthetic record
-gets the outcome it was designed for.
+never matched twice, re-running a batch leaves the row content of all 12 batch tables unchanged (same
+row count and the same SHA-256 over the sorted per-row hashes, for both batches), and every synthetic
+record gets the outcome it was designed for. The re-run is a new Delta version with new data files, so
+the physical files are not byte-identical. `ops_batch_runs` (one row per batch and stage, upserted with
+MERGE) gets new timestamps and is not compared; the test checks that it still holds 6 rows, all
+`SUCCEEDED`.
 
 CI runs in three layers: tests without a JVM on Ubuntu and Windows (Python 3.11 and 3.13), the full
 suite on Ubuntu with Python 3.11 + Java 17, and a real Spark/Delta smoke (Delta I/O, pipeline,

@@ -20,8 +20,8 @@ MANIFEST_FILE = "batch.json"
 GROUND_TRUTH_FILE = "expected_outcomes.jsonl"
 GROUND_TRUTH_SUGGESTIONS_FILE = "expected_suggestions.jsonl"
 
-# Source A: electronic invoices (CSV). supplier_name is an addition to the brief's column list,
-# used only by the secondary similarity suggestions, never by deterministic matching.
+# Source A: electronic invoices (CSV). supplier_name is not needed for matching; it is used only by the
+# secondary similarity suggestions, never by deterministic matching.
 INVOICE_COLUMNS = (
     "invoice_id", "supplier_id", "supplier_name", "invoice_date", "currency",
     "subtotal", "tax_amount", "total_amount", "invoice_reference",

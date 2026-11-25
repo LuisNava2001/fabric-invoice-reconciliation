@@ -4,8 +4,8 @@
 
 | Requirement | Notes |
 | --- | --- |
-| Python 3.10+ | developed with 3.11.9 |
-| JDK 17 or 21 | `JAVA_HOME` must point to it; Java does not need to be on `PATH` |
+| Python 3.11 or 3.13 | developed with 3.11.9. Validated: 3.11 + JDK 17 (full suite), 3.13 + JDK 21 (Spark/Delta smoke in CI), 3.11 and 3.13 without a JVM. Other versions (3.10, 3.12, 3.14) have not been run |
+| JDK 17 or 21 | `JAVA_HOME` must point to it; Java does not need to be on `PATH`. JDK 17 with Python 3.11, JDK 21 with Python 3.13 (the combinations above) |
 | Windows only: Hadoop native helpers | `winutils.exe` and `hadoop.dll` in `%HADOOP_HOME%\bin` (developed with the Hadoop 3.3.5 helpers next to Spark's Hadoop 3.4.2 client) |
 | Network on first run | Spark resolves the Delta jars from Maven Central into `~/.ivy2.5.2` (about 12 MB); later runs use the cache |
 
@@ -31,13 +31,13 @@ python -m venv .venv
 | `spark.sql.session.timeZone` | UTC | deterministic dates |
 | `spark.databricks.delta.snapshotPartitions` | 2 | Delta state reconstruction defaults to 50 partitions |
 | `spark.jars.excludes` | 22 artifacts PySpark already bundles | `delta-spark` 4.2 pulls duplicates through Maven, some older (jackson 2.13 vs 2.20) |
-| `spark.driver.host` / `bindAddress` | 127.0.0.1 | avoids host-name resolution on corporate networks |
+| `spark.driver.host` / `bindAddress` | 127.0.0.1 | avoids slow host-name lookups on some networks |
 | Spark UI, console progress | off | quiet CLI output |
 
 ## Measured on the development machine
 
-Windows 11, 12 logical CPUs, 16 GB RAM (about 3 GB free during the runs), JDK 17, corporate endpoint
-protection:
+Windows 11, 12 logical CPUs, 16 GB RAM (about 3 GB free during the runs), JDK 17, endpoint security
+software active:
 
 | Measurement | Value |
 | --- | --- |
