@@ -1,8 +1,16 @@
-# fabric-invoice-reconciliation
+# Fabric Invoice Reconciliation
 
-Invoice reconciliation on PySpark and Delta Lake, organized as a Bronze/Silver/Gold lakehouse in the
-layout of a Microsoft Fabric Lakehouse. It runs locally end to end on synthetic data; it has not been
-run inside Fabric.
+Invoice reconciliation on PySpark and real Delta Lake tables, organized as a Bronze / Silver / Gold
+lakehouse: raw ingestion with lineage, data-quality rules with a quarantine table, one deterministic
+matching rule with evidence for every decision, and idempotent per-batch writes.
+
+![Offline demo: key figures and record conservation for one synthetic batch](docs/images/demo.png)
+
+**Stack:** PySpark 4.1.1 · Delta Lake 4.2.0 (`delta-spark`) · Python 3.11 / 3.13 · Java 17 / 21 · pytest ·
+GitHub Actions. **Try it:** [Quick Start](#10-quick-start) or open `demo/index.html` offline.
+
+> **Demo scope.** Verified locally and in CI on synthetic data. The layout follows a Microsoft Fabric
+> Lakehouse and a notebook targets Fabric Runtime 2.0, but **execution inside Fabric is not tested**.
 
 ## 1. Project Overview
 
@@ -156,7 +164,7 @@ generator designed for them, whose reason matches when one was designed, and who
 designed flag. It measures agreement with synthetic, designed outcomes, not accuracy against real data
 (the validation check is named `SYNTHETIC_GROUND_TRUTH`).
 
-![Demo page](docs/images/demo.png)
+![Reconciliation status by side for one synthetic batch](docs/images/demo-status.png)
 
 ## 12. Testing
 
@@ -230,7 +238,10 @@ locally by the tests; **execution inside Fabric is not tested.** Differences and
 
 ## 17. AI-Assisted Development Disclosure
 
-This repository was built with an AI coding assistant (Claude) working under my direction. I defined the
-scope, constraints and acceptance criteria, reviewed the design and results, and decided what to publish.
-The assistant wrote most of the code, tests and documentation. Every result quoted here comes from runs
-of the code in this repository on synthetic data; nothing is taken from production systems.
+I designed and directed this project; it was implemented with substantial help from Claude Code (Anthropic). I
+defined the problem, scope, constraints and acceptance criteria, reviewed the design and the results, and decided
+what to publish. Most of the code, tests and documentation were generated with the assistant under that direction,
+which is why the commits carry a `Co-Authored-By` trailer. Results quoted here come from the automated tests,
+evaluations and CI runs in this repository, on synthetic data. They show that the code behaves as described under
+those conditions, not that it is ready for production, and nothing this README marks as simulated, planned or not
+tested has been validated.
